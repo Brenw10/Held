@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Image, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, View, Image, TouchableOpacity, Alert, Text } from 'react-native';
 import * as firebase from 'firebase';
 
 export default class FacebookLogin extends React.Component {
@@ -38,6 +38,7 @@ export default class FacebookLogin extends React.Component {
                         source={require('held/assets/images/facebook-logo.png')}
                         style={styles.logo}
                     />
+                    <Text style={styles.text}>Login</Text>
                 </View>
             </TouchableOpacity>
         );
@@ -46,11 +47,16 @@ export default class FacebookLogin extends React.Component {
 
 var styles = StyleSheet.create({
     container: {
-        flexDirection: 'row',
-        alignItems: 'flex-end',
+        flexDirection: 'column',
+        alignItems: 'center',
     },
     logo: {
         width: 200,
         height: 60,
+    },
+    text: {
+        fontWeight: 'bold',
+        fontSize: 15,
+        color: '#FFF',
     },
 });
