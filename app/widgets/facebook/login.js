@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, Image, TouchableOpacity, Alert } from 'react-native';
 import * as firebase from 'firebase';
 
 export default class FacebookLogin extends React.Component {
@@ -16,15 +16,23 @@ export default class FacebookLogin extends React.Component {
         firebase.initializeApp(config);
     }
 
-    handleLogin() {
-        firebase.database().ref('users/3').set({
-            name: 'Vai',
+    handleFirebaseAuth(token) {
+        const facebookCredential = firebase.auth.FacebookAuthProvider.credential(token);
+        const auth = firebase.auth().signInWithCredential(facebookCredential);
+    }
+
+    async handleFacebookLogin() {
+        const { type, token } = await Expo.Facebook.logInWithReadPermissionsAsync('453060115055613', {
+            permissions: ['email', 'public_profile', 'user_friends'],
         });
+        if (await type === 'success') {
+            this.handleFirebaseAuth(await token);
+        }
     }
 
     render() {
         return (
-            <TouchableOpacity onPress={this.handleLogin}>
+            <TouchableOpacity onPress={this.handleFacebookLogin.bind(this)}>
                 <View style={styles.container}>
                     <Image
                         source={require('held/assets/images/facebook_brand.png')}
