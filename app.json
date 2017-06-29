@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "held",
-    "description": "An empty new project",
+    "name": "Held",
+    "description": "Social App",
     "slug": "held",
-    "privacy": "public",
+    "privacy": "unlisted",
     "sdkVersion": "18.0.0",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -14,9 +14,16 @@
       "hideExponentText": false
     },
     "packagerOpts": {
-      "assetExts": ["ttf", "mp4"]
+      "assetExts": [
+        "ttf",
+        "mp4"
+      ]
+    },
+    "android": {
+      "package": "com.slot.held"
     },
     "ios": {
+      "bundleIdentifier": "com.slot.held",
       "supportsTablet": true
     }
   }
