@@ -4,6 +4,10 @@ import { StyleSheet, View } from 'react-native';
 import FacebookLogin from 'held/app/components/facebook/login';
 
 export default class App extends React.Component {
+  static navigationOptions = {
+    tabBarVisible: false
+  };
+
   render() {
     return (
       <View style={styles.container}>
