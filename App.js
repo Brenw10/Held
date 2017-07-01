@@ -1,7 +1,7 @@
 import React from 'react';
 
 import LoginPage from 'held/app/pages/login';
-import HomePage from 'held/app/pages/home';
+import FeedPage from 'held/app/pages/feed';
 
 import { Button } from 'react-native';
 import { TabNavigator } from 'react-navigation';
@@ -13,7 +13,7 @@ export default TabNavigator({
   Login: {
     screen: LoginPage
   },
-  Home: {
-    screen: HomePage,
+  Feed: {
+    screen: FeedPage,
   },
 });

@@ -3,9 +3,22 @@ import { StyleSheet, View, TouchableOpacity, Image, Text } from 'react-native';
 import * as firebase from 'firebase';
 
 export default class LoginPage extends React.Component {
-  constructor() {
-    super();
+  static navigationOptions = {
+    tabBarVisible: false
+  };
 
+  async handleFacebookLogin() {
+    const { type, token } = await Expo.Facebook.logInWithReadPermissionsAsync('453060115055613', {
+      permissions: ['email', 'public_profile', 'user_friends'],
+    });
+    if (await type === 'success') {
+      const auth = await this.getFirebaseAuth(await token);
+      this.setUserData(auth);
+      this.handleHomePage(auth);
+    }
+  }
+
+  getFirebaseAuth(token) {
     //Todo: Read it from parameter place
     var config = {
       apiKey: "AIzaSyCc-gCBjPIW-CcIAHxttdB9cHks7W_t1R0",
@@ -16,28 +29,21 @@ export default class LoginPage extends React.Component {
       messagingSenderId: "828413601398"
     };
     firebase.initializeApp(config);
-  }
-
-  static navigationOptions = {
-    tabBarVisible: false
-  };
-
-  async handleFacebookLogin() {
-    const { type, token } = await Expo.Facebook.logInWithReadPermissionsAsync('453060115055613', {
-      permissions: ['email', 'public_profile', 'user_friends'],
-    });
-    if (await type === 'success') {
-      this.handleHomePage(await this.getFirebaseAuth(await token));
-    }
-  }
-
-  getFirebaseAuth(token) {
     const facebookCredential = firebase.auth.FacebookAuthProvider.credential(token);
     return firebase.auth().signInWithCredential(facebookCredential);
   }
 
+  setUserData(auth) {
+    firebase.database().ref('users/' + auth.uid).set({
+      name: auth.displayName,
+      email: auth.email,
+      //TODO: Remove this hardcode
+      displayName: 'PotatoCat'
+    });
+  }
+
   handleHomePage(auth) {
-    this.props.navigation.navigate('Home');
+    this.props.navigation.navigate('Feed', { auth: auth });
   }
 
   render() {
