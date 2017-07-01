@@ -2,48 +2,39 @@ import React from 'react';
 import { StyleSheet, View, Text, Image, ScrollView } from 'react-native';
 
 export default class FeedPage extends React.Component {
-  static navigationOptions = {
-    tabBarLabel: 'Feed'
-  };
-
   render() {
-    const arrayExample = {
-      "first": {
-        "description": "test",
-        "photoUrl": "http://pngimg.com/uploads/potato/potato_PNG7081.png?i=1"
-      },
-      "second": {
-        "description": "test2",
-        "photoUrl": "http://pngimg.com/uploads/potato/potato_PNG7081.png?i=1"
-      }
-    };
-    const cards = Object.entries(arrayExample).map(function (item) {
-      console.log(item);
-      return (
+    return (
+      <View style={styles.container}>
+        <View style={styles.headerContainer}><Text style={styles.title}>Held</Text></View>
         <ScrollView>
           <View style={styles.card}>
-            <Image source={{ uri: 'http://www.pngall.com/wp-content/uploads/2016/04/Potato-Free-Download-PNG.png' }} style={styles.cardImage} />
+            <Image source={{ uri: "http://pngimg.com/uploads/potato/potato_PNG7081.png?i=1" }} style={styles.cardImage} />
             <View style={styles.cardDetailContainer}>
-              <Text style={styles.cardTitle}>Title</Text>
-              <Text style={styles.cardDescription}>Desc</Text>
+              <Text style={styles.cardTitle}>PotatoCat</Text>
+              <Text style={styles.cardDescription}>I love potatoes :p</Text>
             </View>
           </View>
         </ScrollView>
-      );
-    });
-
-    return (
-      <View style={styles.container}>
-        {cards}
       </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  headerContainer: {
+    height: 70,
+    alignItems: 'center',
+    backgroundColor: '#3b5998',
+    justifyContent: 'center',
+  },
+  title: {
+    fontWeight: 'bold',
+    fontSize: 20,
+    color: '#FFF',
+    paddingTop: 20,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#f2f2f2',
   },
   card: {
     margin: 20,

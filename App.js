@@ -16,4 +16,15 @@ export default TabNavigator({
   Feed: {
     screen: FeedPage,
   },
-});
+}, {
+    tabBarPosition: 'bottom',
+    tabBarOptions: {
+      style: {
+        backgroundColor: '#3b5998',
+      },
+      indicatorStyle: {
+        backgroundColor: '#FFF',
+      }
+    },
+  }
+);

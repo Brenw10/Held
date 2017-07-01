@@ -1,0 +1,12 @@
+{
+    "first": {
+        "displayName": "PotatoCat",
+        "description": "test",
+        "photoUrl": "http://pngimg.com/uploads/potato/potato_PNG7081.png?i=1"
+    },
+    "second": {
+        "displayName": "PotatoCat2",
+        "description": "test2",
+        "photoUrl": "http://pngimg.com/uploads/potato/potato_PNG7081.png?i=1"
+    }
+}
