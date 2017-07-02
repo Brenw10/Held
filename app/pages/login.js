@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, TouchableOpacity, Image, Text } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Image, Text, Alert, AsyncStorage } from 'react-native';
 import * as firebase from 'firebase';
 
 export default class LoginPage extends React.Component {
@@ -14,7 +14,7 @@ export default class LoginPage extends React.Component {
     if (await type === 'success') {
       const auth = await this.getFirebaseAuth(await token);
       this.setUserData(auth);
-      this.handleHomePage(auth);
+      this.saveAuthStorage(auth);
     }
   }
 
@@ -42,8 +42,8 @@ export default class LoginPage extends React.Component {
     });
   }
 
-  handleHomePage(auth) {
-    this.props.navigation.navigate('Feed', { auth: auth });
+  saveAuthStorage(auth) {
+    AsyncStorage.setItem('@Auth', JSON.stringify(auth));
   }
 
   render() {

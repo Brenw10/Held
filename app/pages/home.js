@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Text, Image, ScrollView } from 'react-native';
 
-export default class FeedPage extends React.Component {
+export default class HomePage extends React.Component {
   render() {
     return (
       <View style={styles.container}>

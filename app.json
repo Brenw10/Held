@@ -20,10 +20,10 @@
       ]
     },
     "android": {
-      "package": "com.slot.held"
+      "package": "com.hook.held"
     },
     "ios": {
-      "bundleIdentifier": "com.slot.held",
+      "bundleIdentifier": "com.hook.held",
       "supportsTablet": true
     }
   }

@@ -1,30 +1,29 @@
 import React from 'react';
-
+import { StyleSheet, View, AsyncStorage } from 'react-native';
 import LoginPage from 'held/app/pages/login';
-import FeedPage from 'held/app/pages/feed';
+import TabNav from 'held/app/components/tab-navigator';
 
-import { Button } from 'react-native';
-import { TabNavigator } from 'react-navigation';
+export default class App extends React.Component {
+  renderPage = () => {
+    switch (AsyncStorage.getItem('@Auth')) {
+      case null:
+        return <LoginPage />;
+      default:
+        return <TabNav />;
+    }
+  }
 
-class App extends React.Component {
+  render() {
+    return (
+      <View style={styles.container}>
+        {this.renderPage()}
+      </View>
+    );
+  }
 }
 
-export default TabNavigator({
-  Login: {
-    screen: LoginPage
-  },
-  Feed: {
-    screen: FeedPage,
-  },
-}, {
-    tabBarPosition: 'bottom',
-    tabBarOptions: {
-      style: {
-        backgroundColor: '#3b5998',
-      },
-      indicatorStyle: {
-        backgroundColor: '#FFF',
-      }
-    },
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
   }
-);
+});
