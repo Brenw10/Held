@@ -4,8 +4,22 @@ import LoginPage from 'held/app/pages/login';
 import TabNav from 'held/app/components/tab-navigator';
 
 export default class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      auth: null,
+    };
+    this.handleAuth();
+  }
+
+  handleAuth = async () => {
+    this.setState({
+      auth: await AsyncStorage.getItem('@Auth')
+    });
+  }
+
   renderPage = () => {
-    switch (AsyncStorage.getItem('@Auth')) {
+    switch (this.state.auth) {
       case null:
         return <LoginPage />;
       default:
