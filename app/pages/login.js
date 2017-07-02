@@ -15,6 +15,7 @@ export default class LoginPage extends React.Component {
       const auth = await this.getFirebaseAuth(await token);
       this.setUserData(auth);
       this.saveAuthStorage(auth);
+      this.props.handleAuth();
     }
   }
 

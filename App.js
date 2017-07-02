@@ -22,7 +22,7 @@ export default class App extends React.Component {
     if (this.state.auth !== null) {
       return <TabNav />;
     }
-    return <LoginPage />;
+    return <LoginPage handleAuth={this.handleAuth} />;
   }
 }
 
