@@ -18,21 +18,11 @@ export default class App extends React.Component {
     });
   }
 
-  renderPage = () => {
-    switch (this.state.auth) {
-      case null:
-        return <LoginPage />;
-      default:
-        return <TabNav />;
-    }
-  }
-
   render() {
-    return (
-      <View style={styles.container}>
-        {this.renderPage()}
-      </View>
-    );
+    if (this.state.auth !== null) {
+      return <TabNav />;
+    }
+    return <LoginPage />;
   }
 }
 
