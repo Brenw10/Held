@@ -8,8 +8,17 @@ import {
     Text,
     AsyncStorage,
 } from 'react-native';
+import FBSDK, { LoginManager } from 'react-native-fbsdk';
 
 export default class Login extends Component {
+    handleFacebookLogin = () => {
+        LoginManager.logInWithReadPermissions(['public_profile']).then((result) => {
+            if (!result.isCancelled) {
+                console.log(result.grantedPermissions.toString());
+            }
+        });
+    }
+
     render() {
         return (
             <View style={styles.container}>
