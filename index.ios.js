@@ -12,7 +12,7 @@ import {
   View
 } from 'react-native';
 
-export default class Held extends Component {
+export default class held extends Component {
   render() {
     return (
       <View style={styles.container}>
@@ -50,4 +50,4 @@ const styles = StyleSheet.create({
   },
 });
 
-AppRegistry.registerComponent('Held', () => Held);
+AppRegistry.registerComponent('held', () => held);

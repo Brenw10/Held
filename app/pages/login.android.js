@@ -40,7 +40,7 @@ export default class Login extends Component {
         return (
             <View style={styles.container}>
                 <TouchableOpacity onPress={() => this.handleFacebookLogin()} style={styles.button}>
-                    <Image source={require('Held/app/assets/images/facebook-logo.png')} style={styles.logo} />
+                    <Image source={require('held/app/assets/images/facebook-logo.png')} style={styles.logo} />
                     <Text style={styles.text}>Login</Text>
                 </TouchableOpacity>
             </View>

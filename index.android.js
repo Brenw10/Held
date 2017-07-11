@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import {
   AppRegistry,
 } from 'react-native';
-import LoginScreen from 'Held/app/pages/login';
+import LoginScreen from 'held/app/pages/login';
 
-export default class Held extends Component {
+export default class held extends Component {
   render() {
     return (
       <LoginScreen />
@@ -12,4 +12,4 @@ export default class Held extends Component {
   }
 }
 
-AppRegistry.registerComponent('Held', () => Held);
+AppRegistry.registerComponent('held', () => held);
