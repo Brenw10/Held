@@ -8,15 +8,32 @@ import {
     Text,
     AsyncStorage,
 } from 'react-native';
-import FBSDK, { LoginManager } from 'react-native-fbsdk';
+import FBSDK, { LoginManager, AccessToken } from 'react-native-fbsdk';
+import * as firebase from 'firebase';
 
 export default class Login extends Component {
-    handleFacebookLogin = () => {
-        LoginManager.logInWithReadPermissions(['public_profile']).then((result) => {
-            if (!result.isCancelled) {
-                console.log(result.grantedPermissions.toString());
-            }
-        });
+    handleFacebookLogin = async () => {
+        const result = await LoginManager.logInWithReadPermissions(['public_profile', 'user_friends']);
+        if (!result.isCancelled) {
+            const accessToken = await AccessToken.getCurrentAccessToken();
+            const auth = await this.getFirebaseAuth(accessToken.accessToken);
+            AsyncStorage.setItem('@Auth', JSON.stringify(auth));
+        }
+    }
+
+    getFirebaseAuth = (token) => {
+        //Todo: Read it from parameter place
+        var config = {
+            apiKey: "AIzaSyCc-gCBjPIW-CcIAHxttdB9cHks7W_t1R0",
+            authDomain: "held-efdf8.firebaseapp.com",
+            databaseURL: "https://held-efdf8.firebaseio.com",
+            projectId: "held-efdf8",
+            storageBucket: "held-efdf8.appspot.com",
+            messagingSenderId: "828413601398"
+        };
+        firebase.initializeApp(config);
+        const facebookCredential = firebase.auth.FacebookAuthProvider.credential(token);
+        return firebase.auth().signInWithCredential(facebookCredential);
     }
 
     render() {

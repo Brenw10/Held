@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import LoginScreen from 'Held/app/pages/login';
 import {
   AppRegistry,
 } from 'react-native';
+import LoginScreen from 'Held/app/pages/login';
 
 export default class Held extends Component {
   render() {
