@@ -23,8 +23,8 @@ export default class Login extends Component {
     }
 
     getFirebaseAuth = (token) => {
-        //Todo: Read it from parameter place
-        var config = {
+        //todo: read it from parameter place
+        const config = {
             apiKey: "AIzaSyCc-gCBjPIW-CcIAHxttdB9cHks7W_t1R0",
             authDomain: "held-efdf8.firebaseapp.com",
             databaseURL: "https://held-efdf8.firebaseio.com",
