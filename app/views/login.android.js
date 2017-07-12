@@ -18,6 +18,7 @@ export default class Login extends Component {
             const accessToken = await AccessToken.getCurrentAccessToken();
             const auth = await this.getFirebaseAuth(accessToken.accessToken);
             AsyncStorage.setItem('@Auth', JSON.stringify(auth));
+            this.props.handleAuth();
         }
     }
 
