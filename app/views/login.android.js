@@ -6,7 +6,6 @@ import {
     TouchableOpacity,
     Image,
     Text,
-    AsyncStorage,
 } from 'react-native';
 import FBSDK, { LoginManager, AccessToken } from 'react-native-fbsdk';
 import * as firebase from 'firebase';
@@ -17,8 +16,7 @@ export default class Login extends Component {
         if (!result.isCancelled) {
             const accessToken = await AccessToken.getCurrentAccessToken();
             const auth = await this.getFirebaseAuth(accessToken.accessToken);
-            AsyncStorage.setItem('@Auth', JSON.stringify(auth));
-            this.props.handleAuth();
+            this.props.setIsLogged(true);
         }
     }
 

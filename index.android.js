@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import {
   AppRegistry,
-  AsyncStorage,
 } from 'react-native';
 import Menu from 'held/app/components/menu';
 import LoginView from 'held/app/views/login';
@@ -10,22 +9,21 @@ export default class held extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      auth: null,
+      isLogged: false,
     };
-    this.handleAuth();
   }
 
-  handleAuth = async () => {
-    this.setState({
-      auth: await AsyncStorage.getItem('@Auth')
-    });
+  setIsLogged = isLogged => {
+    this.setState(
+      { isLogged: isLogged }
+    );
   }
 
   render() {
-    if (this.state.auth !== null) {
+    if (this.state.isLogged) {
       return <Menu />;
     }
-    return <LoginView handleAuth={this.handleAuth} />;
+    return <LoginView setIsLogged={this.setIsLogged} />;
   }
 }
 
