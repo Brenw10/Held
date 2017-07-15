@@ -49,7 +49,8 @@ export default class Post extends Component {
     window.Blob = polyfill.Blob;
 
     const folder = `${user.uid}/posts`;
-    const filename = `${new Date().getTime()}.png`;
+    const time = new Date().getTime();
+    const filename = `${time}.png`;
 
     Blob.build(RNFetchBlob.wrap(this.state.file.path), { type: 'image/jpeg' }).then((blob) =>
       firebase
@@ -57,21 +58,32 @@ export default class Post extends Component {
         .ref(folder)
         .child(filename)
         .put(blob, { contentType: 'image/png' })
-    ).then(() => this.savePost(`${folder}/${filename}`));
+    ).then(() => this.savePost(`${folder}/${filename}`, time));
   }
 
-  savePost = (path) => {
+  savePost = (path, time) => {
     const user = firebase.auth().currentUser;
 
     firebase.database().ref(`users/${user.uid}/posts`).push({
-      path: path
+      time: time,
+      path: path,
     });
 
     this.setLoading(false);
     this.props.navigation.goBack();
   }
 
-  selectedImageView() {
+  render() {
+    return (
+      <View style={styles.container}>
+        <Button title='Choose Image' onPress={() => this.handlePicker()} />
+        {this.renderSelectedImage()}
+        <Spinner visible={this.state.loading} />
+      </View>
+    );
+  }
+
+  renderSelectedImage() {
     if (this.state.file !== null) {
       return (
         <View style={styles.containerSpacing}>
@@ -80,16 +92,6 @@ export default class Post extends Component {
         </View>
       );
     }
-  }
-
-  render() {
-    return (
-      <View style={styles.container}>
-        <Button title='Choose Image' onPress={() => this.handlePicker()} />
-        {this.selectedImageView()}
-        <Spinner visible={this.state.loading} />
-      </View>
-    );
   }
 }
 
