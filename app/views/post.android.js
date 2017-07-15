@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import RNFetchBlob from 'react-native-fetch-blob';
+import Spinner from 'react-native-loading-spinner-overlay';
 import * as firebase from 'firebase';
 
 export default class Post extends Component {
@@ -15,12 +16,19 @@ export default class Post extends Component {
     super(props);
     this.state = {
       file: null,
+      loading: false,
     };
   }
 
   static navigationOptions = {
     title: 'Upload',
   };
+
+  setLoading = (value) => {
+    this.setState({
+      loading: value,
+    });
+  }
 
   handlePicker = () => {
     ImagePicker.launchImageLibrary({}, response => {
@@ -33,6 +41,7 @@ export default class Post extends Component {
   }
 
   handleUploadImage = () => {
+    this.setLoading(true);
     const user = firebase.auth().currentUser;
 
     const polyfill = RNFetchBlob.polyfill
@@ -57,12 +66,15 @@ export default class Post extends Component {
     firebase.database().ref(`posts/${user.uid}`).push({
       path: path
     });
+
+    this.setLoading(false);
+    this.props.navigation.navigate('Home');
   }
 
   selectedImageView() {
     if (this.state.file !== null) {
       return (
-        <View>
+        <View style={styles.containerSpacing}>
           <Image source={{ uri: `data:image/png;base64,${this.state.file.data}` }} style={styles.image} />
           <Button title='Send' onPress={() => this.handleUploadImage()} />
         </View>
@@ -75,6 +87,7 @@ export default class Post extends Component {
       <View style={styles.container}>
         <Button title='Choose Image' onPress={() => this.handlePicker()} />
         {this.selectedImageView()}
+        <Spinner visible={this.state.loading} />
       </View>
     );
   }
@@ -86,6 +99,11 @@ const styles = StyleSheet.create({
   },
   image: {
     height: 250,
+  },
+  containerSpacing: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'space-between',
   },
 });
 
