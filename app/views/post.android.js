@@ -24,9 +24,11 @@ export default class Post extends Component {
 
   handlePicker = () => {
     ImagePicker.launchImageLibrary({}, response => {
-      this.setState(
-        { file: response }
-      );
+      if (!response.didCancel && !response.error) {
+        this.setState(
+          { file: response }
+        );
+      }
     });
   }
 
