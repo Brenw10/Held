@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import FBSDK, { LoginManager, AccessToken } from 'react-native-fbsdk';
 import * as firebase from 'firebase';
+import { GraphRequest, GraphRequestManager } from 'react-native-fbsdk';
 
 export default class Login extends Component {
     handleFacebookLogin = async () => {
@@ -16,8 +17,27 @@ export default class Login extends Component {
         if (!result.isCancelled) {
             const accessToken = await AccessToken.getCurrentAccessToken();
             const auth = await this.getFirebaseAuth(accessToken.accessToken);
+            this.setFriends();
+            this.setPrivate(accessToken);
             this.props.setIsLogged(true);
         }
+    }
+
+    setPrivate = (accessToken) => {
+        const user = firebase.auth().currentUser;
+        firebase.database().ref(`users/${user.uid}/private`).update({
+            fuid: accessToken.userID,
+        });
+    };
+
+    setFriends = () => {
+        const friends = new GraphRequest('/me/friends', null, (error, result) => {
+            if (!error) {
+                const user = firebase.auth().currentUser;
+                firebase.database().ref(`users/${user.uid}/friends`).set(result.data);
+            }
+        });
+        new GraphRequestManager().addRequest(friends).start();
     }
 
     getFirebaseAuth = (token) => {
