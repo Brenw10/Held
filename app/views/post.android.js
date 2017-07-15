@@ -68,7 +68,7 @@ export default class Post extends Component {
     });
 
     this.setLoading(false);
-    this.props.navigation.navigate('Home');
+    this.props.navigation.goBack();
   }
 
   selectedImageView() {
