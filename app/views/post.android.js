@@ -63,7 +63,7 @@ export default class Post extends Component {
   savePost = (path) => {
     const user = firebase.auth().currentUser;
 
-    firebase.database().ref(`posts/${user.uid}`).push({
+    firebase.database().ref(`users/${user.uid}/posts`).push({
       path: path
     });
 
