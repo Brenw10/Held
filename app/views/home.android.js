@@ -29,13 +29,13 @@ export default class Home extends Component {
         return (
             <View style={styles.container}>
                 <ScrollView>
-                    <View style={styles.post}>
+                    <View>
                         <Image source={{ uri: "http://fuzzco.com/wp-content/uploads/2015/02/081-800x800.png" }} style={styles.image} />
                     </View>
-                    <View style={styles.post}>
+                    <View>
                         <Image source={{ uri: "http://www.trutower.com/wp-content/uploads/2013/11/Snapchat-logo-620x412.jpg" }} style={styles.image} />
                     </View>
-                    <View style={styles.post}>
+                    <View>
                         <Image source={{ uri: "https://d1nept1345ks2.cloudfront.net/static/images/og_fatsecret.png" }} style={styles.image} />
                     </View>
                 </ScrollView>
@@ -50,10 +50,6 @@ const styles = StyleSheet.create({
     },
     image: {
         height: 250,
-    },
-    post: {
-        borderBottomWidth: 0.5,
-        borderColor: '#FFF',
     },
 });
 
