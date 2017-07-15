@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import {
   AppRegistry,
 } from 'react-native';
-import Menu from 'held/app/components/menu';
-import LoginView from 'held/app/views/login';
+import Menu from 'Held/app/components/menu';
+import LoginView from 'Held/app/views/login';
 
-export default class held extends Component {
+export default class Held extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -27,4 +27,4 @@ export default class held extends Component {
   }
 }
 
-AppRegistry.registerComponent('held', () => held);
+AppRegistry.registerComponent('Held', () => Held);

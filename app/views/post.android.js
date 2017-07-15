@@ -87,4 +87,4 @@ const styles = StyleSheet.create({
   },
 });
 
-AppRegistry.registerComponent('Post', () => held);
+AppRegistry.registerComponent('Post', () => Post);

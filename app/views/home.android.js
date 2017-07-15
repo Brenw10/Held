@@ -16,7 +16,7 @@ export default class Home extends Component {
             //todo: remove style in-line
             headerRight:
             <TouchableOpacity onPress={() => navigation.navigate('Post')}>
-                <Image source={require('held/app/assets/images/camera.png')} style={{ width: 30, height: 30, marginRight: 20 }} />
+                <Image source={require('Held/app/assets/images/camera.png')} style={{ width: 30, height: 30, marginRight: 20 }} />
             </TouchableOpacity>
         }
     };
@@ -57,4 +57,4 @@ const styles = StyleSheet.create({
     },
 });
 
-AppRegistry.registerComponent('Home', () => Held);
+AppRegistry.registerComponent('Home', () => Home);
