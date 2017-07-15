@@ -8,8 +8,14 @@ import {
     TouchableOpacity,
 } from 'react-native';
 import * as firebase from 'firebase';
+import { GraphRequest, GraphRequestManager } from 'react-native-fbsdk';
 
 export default class Home extends Component {
+    constructor(props) {
+        super(props);
+        this.handlePosts();
+    }
+
     static navigationOptions = ({ navigation }) => {
         return {
             title: 'Home',
@@ -21,8 +27,15 @@ export default class Home extends Component {
         }
     };
 
-    getPosts = () => {
+    handlePosts = () => {
+        const friends = new GraphRequest('/me/friends', null, (error, result) => {
+            if (!error) this.setPosts(result.data);
+        });
+        new GraphRequestManager().addRequest(friends).start();
+    }
 
+    setPosts = friends => {
+        console.log(friends);
     }
 
     render() {
