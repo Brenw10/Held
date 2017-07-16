@@ -13,19 +13,19 @@ import { GraphRequest, GraphRequestManager } from 'react-native-fbsdk';
 
 export default class Login extends Component {
     handleFacebookLogin = async () => {
-        const result = await LoginManager.logInWithReadPermissions(['public_profile', 'user_friends']);
+        const result = await LoginManager.logInWithReadPermissions(['public_profile', 'user_friends', 'email']);
         if (!result.isCancelled) {
             const accessToken = await AccessToken.getCurrentAccessToken();
             const auth = await this.getFirebaseAuth(accessToken.accessToken);
             this.setFriends();
-            this.setPrivate(accessToken);
+            this.setFacebookUserId(accessToken);
             this.props.setIsLogged(true);
         }
     }
 
-    setPrivate = (accessToken) => {
+    setFacebookUserId = (accessToken) => {
         const user = firebase.auth().currentUser;
-        firebase.database().ref(`users/${user.uid}/private`).update({
+        firebase.database().ref(`users/${user.uid}`).update({
             fuid: accessToken.userID,
         });
     };
