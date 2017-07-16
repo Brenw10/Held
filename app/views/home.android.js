@@ -10,33 +10,56 @@ import {
 import * as firebase from 'firebase';
 
 export default class Home extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            posts: {},
+        };
+        this.handlePosts();
+    }
+
     static navigationOptions = ({ navigation }) => {
         return {
             title: 'Home',
             //todo: remove style in-line
             headerRight:
             <TouchableOpacity onPress={() => navigation.navigate('Post')}>
-                <Image source={require('Held/app/assets/images/camera.png')} style={{ width: 30, height: 30, marginRight: 20 }} />
+                <Image source={require('Held/app/assets/images/camera.png')} style={{ width: 30, height: 30, marginRight: 15 }} />
             </TouchableOpacity>
         }
     };
+
+    handlePosts = () => {
+        const user = firebase.auth().currentUser;
+        firebase
+            .database()
+            .ref(`users/${user.uid}/fuid`).once('value')
+            .then(snapshot => this.setPosts(snapshot.val()));
+    }
+
+    setPosts = fuid => {
+        firebase
+            .database()
+            .ref('posts')
+            .on('value', snapshot => this.setState({ posts: snapshot.val() }));
+    }
 
     render() {
         return (
             <View style={styles.container}>
                 <ScrollView>
-                    <View>
-                        <Image source={{ uri: "http://fuzzco.com/wp-content/uploads/2015/02/081-800x800.png" }} style={styles.image} />
-                    </View>
-                    <View>
-                        <Image source={{ uri: "http://www.trutower.com/wp-content/uploads/2013/11/Snapchat-logo-620x412.jpg" }} style={styles.image} />
-                    </View>
-                    <View>
-                        <Image source={{ uri: "https://d1nept1345ks2.cloudfront.net/static/images/og_fatsecret.png" }} style={styles.image} />
-                    </View>
+                    {this.renderPosts()}
                 </ScrollView>
             </View>
         );
+    }
+
+    renderPosts() {
+        return Object.entries(this.state.posts).map(post => {
+            return (
+                <Image key={post[0]} source={{ uri: post[1].url }} style={styles.image} />
+            );
+        });
     }
 }
 
