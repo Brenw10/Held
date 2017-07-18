@@ -65,16 +65,12 @@ export default class Post extends Component {
     const user = firebase.auth().currentUser;
 
     //todo: fix callback hell
-    firebase.database().ref(`users/${user.uid}/friends`).once('value').then(snapshot => {
-      firebase.storage().ref(path).getDownloadURL().then(url => {
-        firebase.database().ref(`posts`).push({
-          uid: user.uid,
-          time: time,
-          url: url,
-          friends: snapshot.val(),
-        });
+    firebase.storage().ref(path).getDownloadURL().then(url => {
+      firebase.database().ref(`posts/${user.uid}`).push({
+        time: time,
+        url: url
       });
-    })
+    });
 
     this.setLoading(false);
     this.props.navigation.goBack();
