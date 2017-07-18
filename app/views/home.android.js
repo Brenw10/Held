@@ -55,11 +55,13 @@ export default class Home extends Component {
     }
 
     renderPosts() {
-        return Object.entries(this.state.posts).reverse().map(post => {
-            return (
-                <Image key={post[0]} source={{ uri: post[1].url }} style={styles.image} />
-            );
-        });
+        if (this.state.posts !== null) {
+            return Object.entries(this.state.posts).reverse().map(post => {
+                return (
+                    <Image key={post[0]} source={{ uri: post[1].url }} style={styles.image} />
+                );
+            });
+        }
     }
 }
 

@@ -17,8 +17,8 @@ export default class Login extends Component {
         if (!result.isCancelled) {
             const accessToken = await AccessToken.getCurrentAccessToken();
             const auth = await this.getFirebaseAuth(accessToken.accessToken);
-            this.setFriends();
             this.setFacebookUserId(accessToken);
+            this.setFriends();
             this.props.setIsLogged(true);
         }
     }
