@@ -31,6 +31,7 @@ export default class Login extends Component {
     };
 
     setFriends = () => {
+        // Make it like a way that use promise
         const friends = new GraphRequest('/me/friends', null, (error, result) => {
             if (!error) {
                 const user = firebase.auth().currentUser;

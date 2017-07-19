@@ -13,7 +13,7 @@ export default class Home extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            posts: {},
+            posts: null,
         };
         this.handlePosts();
     }
@@ -30,18 +30,13 @@ export default class Home extends Component {
     };
 
     handlePosts = () => {
-        const user = firebase.auth().currentUser;
         firebase
-            .database()
-            .ref(`users/${user.uid}/fuid`).once('value')
-            .then(snapshot => this.setPosts(snapshot.val()));
-    }
-
-    setPosts = fuid => {
-        firebase
-            .database()
-            .ref('posts')
-            .on('value', snapshot => this.setState({ posts: snapshot.val() }));
+            .database().ref(`posts`)
+            .limitToLast(10000).on('value', snapshot => {
+                const posts = Object.entries(snapshot.val());
+                posts.reverse();
+                this.setState({ posts: posts });
+            });
     }
 
     render() {
@@ -55,8 +50,9 @@ export default class Home extends Component {
     }
 
     renderPosts() {
-        if (this.state.posts !== null) {
-            return Object.entries(this.state.posts).reverse().map(post => {
+        const posts = this.state.posts;
+        if (posts !== null) {
+            return posts.map(post => {
                 return (
                     <Image key={post[0]} source={{ uri: post[1].url }} style={styles.image} />
                 );
