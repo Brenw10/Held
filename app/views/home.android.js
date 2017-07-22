@@ -3,11 +3,12 @@ import {
     AppRegistry,
     StyleSheet,
     View,
-    Image,
     ScrollView,
     TouchableOpacity,
 } from 'react-native';
 import * as firebase from 'firebase';
+import Image from 'react-native-image-progress';
+import ProgressBar from 'react-native-progress/Bar';
 
 export default class Home extends Component {
     constructor(props) {
@@ -69,7 +70,7 @@ export default class Home extends Component {
     renderPosts() {
         return this.state.posts.map((post, key) => {
             return (
-                <Image key={key} source={{ uri: post.url }} style={styles.image} />
+                <Image key={key} source={{ uri: post.url }} style={styles.image} indicator={ProgressBar} />
             );
         });
     }
