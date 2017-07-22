@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import {
     AppRegistry,
     StyleSheet,
-    View,
     ScrollView,
     TouchableOpacity,
+    RefreshControl,
 } from 'react-native';
 import * as firebase from 'firebase';
 import Image from 'react-native-image-progress';
@@ -16,6 +16,7 @@ export default class Home extends Component {
         this.state = {
             posts: [],
             friends: [],
+            refreshing: false,
         };
         this.handleFriends();
         this.handlePosts();
@@ -36,6 +37,10 @@ export default class Home extends Component {
         }
     };
 
+    _onRefresh() {
+        this.setState({ refreshing: true });
+    }
+
     handleFriends = () => {
         const user = firebase.auth().currentUser;
         firebase.database().ref(`/users/${user.uid}/friendList`).on('value', snapshop => {
@@ -51,19 +56,23 @@ export default class Home extends Component {
     }
 
     setPost = post => {
-        if (this.state.friends.indexOf(post.uid) >= 0)
+        if (this.state.friends.indexOf(post.uid) >= 0) {
             this.setState({
                 posts: this.state.posts.concat([post]),
             });
+        }
     }
 
     render() {
         return (
-            <View style={styles.container}>
-                <ScrollView>
-                    {this.renderPosts()}
-                </ScrollView>
-            </View>
+            <ScrollView style={styles.container} refreshControl={
+                <RefreshControl
+                    refreshing={this.state.refreshing}
+                    onRefresh={() => this._onRefresh()}
+                />
+            }>
+                {this.renderPosts()}
+            </ScrollView>
         );
     }
 
