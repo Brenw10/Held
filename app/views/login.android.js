@@ -12,25 +12,29 @@ import * as firebase from 'firebase';
 import { GraphRequest, GraphRequestManager } from 'react-native-fbsdk';
 
 export default class Login extends Component {
+    static navigationOptions = {
+        header: null,
+    };
+    
     handleFacebookLogin = async () => {
         const result = await LoginManager.logInWithReadPermissions(['public_profile', 'user_friends', 'email']);
         if (!result.isCancelled) {
             const accessToken = await AccessToken.getCurrentAccessToken();
             const auth = await this.getFirebaseAuth(accessToken.accessToken);
-            this.setFacebookUserId(accessToken);
-            this.setFriends();
-            this.props.setIsLogged(true);
+            this.setFacebookUserId(accessToken.userID);
+            this.handleFriends();
+            this.props.navigation.navigate('Home');
         }
     }
 
-    setFacebookUserId = (accessToken) => {
+    setFacebookUserId = userID => {
         const user = firebase.auth().currentUser;
         firebase.database().ref(`users/${user.uid}`).update({
-            fuid: accessToken.userID,
+            fuid: userID,
         });
     };
 
-    setFriends = () => {
+    handleFriends = () => {
         // Make it like a way that use promise
         const friends = new GraphRequest('/me/friends', null, (error, result) => {
             if (!error) {

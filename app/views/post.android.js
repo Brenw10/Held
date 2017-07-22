@@ -67,7 +67,8 @@ export default class Post extends Component {
     //todo: fix callback hell
     firebase.storage().ref(path).getDownloadURL().then(url => {
       firebase.database().ref(`posts`).push({
-        time: time,
+        timestamp: time,
+        negativeTimestamp: 0 - time,
         url: url,
         uid: user.uid
       });

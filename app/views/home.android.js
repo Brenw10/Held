@@ -13,15 +13,21 @@ export default class Home extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            posts: null,
+            posts: [],
+            friends: [],
         };
+        this.handleFriends();
         this.handlePosts();
     }
 
     static navigationOptions = ({ navigation }) => {
         return {
             title: 'Home',
-            //todo: remove style in-line
+            headerTitleStyle: { alignSelf: 'center' },
+            headerLeft:
+            <TouchableOpacity onPress={() => navigation.navigate('Post')}>
+                <Image source={require('Held/app/assets/images/camera.png')} style={{ width: 30, height: 30, marginLeft: 15 }} />
+            </TouchableOpacity>,
             headerRight:
             <TouchableOpacity onPress={() => navigation.navigate('Post')}>
                 <Image source={require('Held/app/assets/images/camera.png')} style={{ width: 30, height: 30, marginRight: 15 }} />
@@ -29,13 +35,24 @@ export default class Home extends Component {
         }
     };
 
+    handleFriends = () => {
+        const user = firebase.auth().currentUser;
+        firebase.database().ref(`/users/${user.uid}/friendList`).on('value', snapshop => {
+            this.setState({ friends: snapshop.val() });
+        });
+    }
+
     handlePosts = () => {
-        firebase
-            .database().ref(`posts`)
-            .limitToLast(10000).on('value', snapshot => {
-                const posts = Object.entries(snapshot.val());
-                posts.reverse();
-                this.setState({ posts: posts });
+        const ref = firebase.database().ref('posts');
+        ref.orderByChild('negativeTimestamp').on('child_added', snapshop => {
+            this.setPost(snapshop.val());
+        });
+    }
+
+    setPost = post => {
+        if (this.state.friends.indexOf(post.uid) >= 0)
+            this.setState({
+                posts: this.state.posts.concat([post]),
             });
     }
 
@@ -50,14 +67,11 @@ export default class Home extends Component {
     }
 
     renderPosts() {
-        const posts = this.state.posts;
-        if (posts !== null) {
-            return posts.map(post => {
-                return (
-                    <Image key={post[0]} source={{ uri: post[1].url }} style={styles.image} />
-                );
-            });
-        }
+        return this.state.posts.map((post, key) => {
+            return (
+                <Image key={key} source={{ uri: post.url }} style={styles.image} />
+            );
+        });
     }
 }
 
