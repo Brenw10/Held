@@ -45,7 +45,7 @@ export default class Login extends Component {
         new GraphRequestManager().addRequest(friends).start();
     }
 
-    getFirebaseAuth = (token) => {
+    getFirebaseAuth = token => {
         //todo: read it from parameter place
         const config = {
             apiKey: "AIzaSyCc-gCBjPIW-CcIAHxttdB9cHks7W_t1R0",

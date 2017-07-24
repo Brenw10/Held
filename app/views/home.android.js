@@ -14,12 +14,9 @@ export default class Home extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            posts: [],
-            friends: [],
-            refreshing: false,
+            posts: null,
         };
-        this.handleFriends();
-        this.handlePosts();
+        this._onRefresh();
     }
 
     static navigationOptions = ({ navigation }) => {
@@ -38,36 +35,35 @@ export default class Home extends Component {
     };
 
     _onRefresh() {
-        this.setState({ refreshing: true });
+        this.handlePosts();
     }
 
-    handleFriends = () => {
+    handlePosts = async () => {
+        const feeds = await this.getFeed();
+        const posts = this.getPostsByFeed(feeds);
+        Promise.all(posts).then(snapshot => {
+            this.setState({ posts: snapshot });
+        });
+    }
+
+    getFeed = () => {
         const user = firebase.auth().currentUser;
-        firebase.database().ref(`/users/${user.uid}/friendList`).on('value', snapshop => {
-            this.setState({ friends: snapshop.val() });
-        });
+        const ref = firebase.database().ref();
+        return ref.child(`/feed/users/${user.uid}`).limitToLast(10).once('value').then(snapshot => snapshot.val());
     }
 
-    handlePosts = () => {
-        const ref = firebase.database().ref('posts');
-        ref.orderByChild('negativeTimestamp').on('child_added', snapshop => {
-            this.setPost(snapshop.val());
+    getPostsByFeed = feeds => {
+        return Object.values(feeds).map(feed => {
+            return firebase.database().ref().child(`/feed/posts/${feed.uid}/${feed.postId}`)
+                .once('value').then(snapshot => snapshot.val());
         });
-    }
-
-    setPost = post => {
-        if (this.state.friends.indexOf(post.uid) >= 0) {
-            this.setState({
-                posts: this.state.posts.concat([post]),
-            });
-        }
     }
 
     render() {
         return (
             <ScrollView style={styles.container} refreshControl={
                 <RefreshControl
-                    refreshing={this.state.refreshing}
+                    refreshing={false}
                     onRefresh={() => this._onRefresh()}
                 />
             }>
@@ -77,11 +73,13 @@ export default class Home extends Component {
     }
 
     renderPosts() {
-        return this.state.posts.map((post, key) => {
-            return (
-                <Image key={key} source={{ uri: post.url }} style={styles.image} indicator={ProgressBar} />
-            );
-        });
+        if (this.state.posts !== null) {
+            return this.state.posts.reverse().map((post, key) => {
+                return (
+                    <Image key={key} source={{ uri: post.url }} style={styles.image} indicator={ProgressBar} />
+                );
+            });
+        }
     }
 }
 
