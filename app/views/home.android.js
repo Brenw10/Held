@@ -49,7 +49,7 @@ export default class Home extends Component {
     getFeed = () => {
         const user = firebase.auth().currentUser;
         const ref = firebase.database().ref();
-        return ref.child(`/feed/users/${user.uid}`).limitToLast(10).once('value').then(snapshot => snapshot.val());
+        return ref.child(`/feed/users/${user.uid}`).once('value').then(snapshot => snapshot.val());
     }
 
     getPostsByFeed = feeds => {
