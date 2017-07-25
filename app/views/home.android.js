@@ -34,11 +34,7 @@ export default class Home extends Component {
         }
     };
 
-    _onRefresh() {
-        this.handlePosts();
-    }
-
-    handlePosts = async () => {
+    _onRefresh = async () => {
         const feeds = await this.getFeed();
         const posts = this.getPostsByFeed(feeds);
         Promise.all(posts).then(snapshot => {
