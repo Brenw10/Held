@@ -12,10 +12,28 @@ import * as firebase from 'firebase';
 import { GraphRequest, GraphRequestManager } from 'react-native-fbsdk';
 
 export default class Login extends Component {
+    constructor(props) {
+        super(props);
+        this.initializeFirebase();
+    }
+
     static navigationOptions = {
         header: null,
     };
-    
+
+    initializeFirebase = () => {
+        //todo: read it from parameter place
+        const config = {
+            apiKey: "AIzaSyCc-gCBjPIW-CcIAHxttdB9cHks7W_t1R0",
+            authDomain: "held-efdf8.firebaseapp.com",
+            databaseURL: "https://held-efdf8.firebaseio.com",
+            projectId: "held-efdf8",
+            storageBucket: "held-efdf8.appspot.com",
+            messagingSenderId: "828413601398"
+        };
+        firebase.initializeApp(config);
+    }
+
     handleFacebookLogin = async () => {
         const result = await LoginManager.logInWithReadPermissions(['public_profile', 'user_friends', 'email']);
         if (!result.isCancelled) {
@@ -46,16 +64,6 @@ export default class Login extends Component {
     }
 
     getFirebaseAuth = token => {
-        //todo: read it from parameter place
-        const config = {
-            apiKey: "AIzaSyCc-gCBjPIW-CcIAHxttdB9cHks7W_t1R0",
-            authDomain: "held-efdf8.firebaseapp.com",
-            databaseURL: "https://held-efdf8.firebaseio.com",
-            projectId: "held-efdf8",
-            storageBucket: "held-efdf8.appspot.com",
-            messagingSenderId: "828413601398"
-        };
-        firebase.initializeApp(config);
         const facebookCredential = firebase.auth.FacebookAuthProvider.credential(token);
         return firebase.auth().signInWithCredential(facebookCredential);
     }
