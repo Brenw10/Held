@@ -3,18 +3,17 @@ import {
     AppRegistry,
     StyleSheet,
     View,
-    TouchableOpacity,
-    Image,
-    Text,
+    AsyncStorage,
 } from 'react-native';
 import FBSDK, { LoginManager, AccessToken } from 'react-native-fbsdk';
+import { SocialIcon } from 'react-native-elements'
 import * as firebase from 'firebase';
-import { GraphRequest, GraphRequestManager } from 'react-native-fbsdk';
 
 export default class Login extends Component {
     constructor(props) {
         super(props);
         this.initializeFirebase();
+        AsyncStorage.getItem('token').then(token => this.handleLogin(token));
     }
 
     static navigationOptions = {
@@ -34,47 +33,47 @@ export default class Login extends Component {
         firebase.initializeApp(config);
     }
 
-    handleFacebookLogin = async () => {
+    handleToken = async () => {
         const result = await LoginManager.logInWithReadPermissions(['public_profile', 'user_friends', 'email']);
         if (!result.isCancelled) {
-            const accessToken = await AccessToken.getCurrentAccessToken();
-            const auth = await this.getFirebaseAuth(accessToken.accessToken);
-            this.setFacebookUserId(accessToken.userID);
-            this.handleFriends();
-            this.props.navigation.navigate('Home');
+            const data = await AccessToken.getCurrentAccessToken();
+            this.handleLogin(data.accessToken);
         }
     }
 
-    setFacebookUserId = userID => {
-        const user = firebase.auth().currentUser;
-        firebase.database().ref(`users/${user.uid}`).update({
-            fuid: userID,
-        });
-    };
-
-    handleFriends = () => {
-        // Make it like a way that use promise
-        const friends = new GraphRequest('/me/friends', null, (error, result) => {
-            if (!error) {
-                const user = firebase.auth().currentUser;
-                firebase.database().ref(`users/${user.uid}/friends`).set(result.data);
+    handleLogin = token => {
+        this.isValidToken(token).then(response => {
+            if (response.ok) {
+                this.loginFirebase(token);
+                this.loginSuccess(token);
             }
         });
-        new GraphRequestManager().addRequest(friends).start();
     }
 
-    getFirebaseAuth = token => {
+    loginFirebase = token => {
         const facebookCredential = firebase.auth.FacebookAuthProvider.credential(token);
         return firebase.auth().signInWithCredential(facebookCredential);
+    };
+
+    isValidToken = token => {
+        return fetch('http://198.58.104.208:8080/api/auth', {
+            headers: {
+                'access-token': token,
+            }
+        });
+    }
+
+    loginSuccess = token => {
+        AsyncStorage.setItem('token', token);
+        this.props.navigation.navigate('Home');
     }
 
     render() {
         return (
             <View style={styles.container}>
-                <TouchableOpacity onPress={() => this.handleFacebookLogin()} style={styles.button}>
-                    <Image source={require('Held/app/assets/images/facebook-logo.png')} style={styles.logo} />
-                    <Text style={styles.text}>Login</Text>
-                </TouchableOpacity>
+                <View style={styles.buttonContainer}>
+                    <SocialIcon button type='facebook' title='Sign In With Facebook' onPress={() => this.handleToken()} />
+                </View>
             </View>
         );
     }
@@ -82,24 +81,13 @@ export default class Login extends Component {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#3b5998',
+        flex: 1,
+        backgroundColor: '#e7e8ec',
+    },
+    buttonContainer: {
         flex: 1,
         flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    button: {
-        flexDirection: 'column',
-        alignItems: 'center',
-    },
-    logo: {
-        width: 200,
-        height: 60,
-    },
-    text: {
-        fontWeight: 'bold',
-        fontSize: 15,
-        color: '#FFF',
+        justifyContent: 'flex-end',
     },
 });
 

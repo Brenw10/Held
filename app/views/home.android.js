@@ -5,17 +5,21 @@ import {
     ScrollView,
     TouchableOpacity,
     RefreshControl,
+    AsyncStorage,
+    Text,
+    View,
 } from 'react-native';
-import * as firebase from 'firebase';
-import Image from 'react-native-image-progress';
-import ProgressBar from 'react-native-progress/Bar';
+import { Card, ListItem, Icon, SideMenu } from 'react-native-elements';
 
 export default class Home extends Component {
     constructor(props) {
         super(props);
+
         this.state = {
             posts: null,
+            refreshing: false
         };
+
         this._onRefresh();
     }
 
@@ -23,43 +27,34 @@ export default class Home extends Component {
         return {
             title: 'Home',
             headerTitleStyle: { alignSelf: 'center' },
-            headerLeft:
-            <TouchableOpacity onPress={() => navigation.navigate('Post')}>
-                <Image source={require('Held/app/assets/images/camera.png')} style={{ width: 30, height: 30, marginLeft: 15 }} />
-            </TouchableOpacity>,
+            headerLeft: <Icon name='menu' style={{ marginLeft: 15 }} />,
             headerRight:
             <TouchableOpacity onPress={() => navigation.navigate('Post')}>
-                <Image source={require('Held/app/assets/images/camera.png')} style={{ width: 30, height: 30, marginRight: 15 }} />
-            </TouchableOpacity>
+                <Icon name='create' style={{ marginRight: 15 }} />
+            </TouchableOpacity>,
         }
     };
 
     _onRefresh = async () => {
-        const feeds = await this.getFeed();
-        const posts = this.getPostsByFeed(feeds);
-        Promise.all(posts).then(snapshot => {
-            this.setState({ posts: snapshot });
-        });
+        this.setState({ refreshing: true });
+        const token = await AsyncStorage.getItem('token');
+        const posts = await this.getPosts(token);
+        this.setState({ posts: posts, refreshing: false });
     }
 
-    getFeed = () => {
-        const user = firebase.auth().currentUser;
-        const ref = firebase.database().ref();
-        return ref.child(`/feed/users/${user.uid}`).once('value').then(snapshot => snapshot.val());
-    }
-
-    getPostsByFeed = feeds => {
-        return Object.values(feeds).map(feed => {
-            return firebase.database().ref().child(`/feed/posts/${feed.uid}/${feed.postId}`)
-                .once('value').then(snapshot => snapshot.val());
-        });
+    getPosts = token => {
+        return fetch('http://198.58.104.208:8080/api/posts', {
+            headers: {
+                'access-token': token,
+            }
+        }).then(response => response.json());
     }
 
     render() {
         return (
             <ScrollView style={styles.container} refreshControl={
                 <RefreshControl
-                    refreshing={false}
+                    refreshing={this.state.refreshing}
                     onRefresh={() => this._onRefresh()}
                 />
             }>
@@ -69,12 +64,29 @@ export default class Home extends Component {
     }
 
     renderPosts() {
-        if (this.state.posts !== null) {
-            return this.state.posts.reverse().map((post, key) => {
-                return (
-                    <Image key={key} source={{ uri: post.url }} style={styles.image} indicator={ProgressBar} />
-                );
-            });
+        if (this.state.posts === null) return;
+        return this.state.posts.map((post, key) => {
+            return (
+                <Card key={key}
+                    imageStyle={styles.cardImage}
+                    image={this.renderCardImage(post)}>
+                    <Text style={styles.cardText}>{post.text}</Text>
+                    <View style={styles.cardButton}>
+                        <TouchableOpacity style={styles.fullsize}>
+                            <Icon name='chat-bubble-outline' />
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.fullsize}>
+                            <Icon name='favorite-border' />
+                        </TouchableOpacity>
+                    </View>
+                </Card>
+            );
+        });
+    }
+
+    renderCardImage = post => {
+        if (post.url) {
+            return { uri: post.url };
         }
     }
 }
@@ -82,9 +94,19 @@ export default class Home extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: '#e7e8ec',
     },
-    image: {
-        height: 300,
+    fullsize: {
+        flex: 1,
+    },
+    cardImage: {
+        height: 350,
+    },
+    cardText: {
+        marginBottom: 20,
+    },
+    cardButton: {
+        flexDirection: 'row',
     },
 });
 

@@ -2,113 +2,148 @@ import React, { Component } from 'react';
 import {
   AppRegistry,
   View,
-  Button,
-  Image,
   StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  KeyboardAvoidingView,
+  AsyncStorage
 } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import RNFetchBlob from 'react-native-fetch-blob';
 import Spinner from 'react-native-loading-spinner-overlay';
 import * as firebase from 'firebase';
+import { Card, Icon } from 'react-native-elements';
 
 export default class Post extends Component {
   constructor(props) {
     super(props);
     this.state = {
       file: null,
+      text: null,
       loading: false,
     };
   }
 
   static navigationOptions = {
-    title: 'Upload',
+    title: 'Upload'
   };
 
-  setLoading = (value) => {
-    this.setState({
-      loading: value,
-    });
+  getFirebaseImage = folderPath => {
+    return firebase.storage().ref(folderPath).getDownloadURL();
   }
 
-  handlePicker = () => {
-    ImagePicker.launchImageLibrary({}, response => {
-      if (!response.didCancel && !response.error) {
-        this.setState(
-          { file: response }
-        );
-      }
-    });
-  }
-
-  handleUploadImage = () => {
-    this.setLoading(true);
+  uploadImage = file => {
     const user = firebase.auth().currentUser;
 
     const polyfill = RNFetchBlob.polyfill
     window.XMLHttpRequest = polyfill.XMLHttpRequest;
     window.Blob = polyfill.Blob;
 
-    const folder = `${user.uid}/posts`;
+    const folder = `/users/${user.uid}`;
     const time = new Date().getTime();
     const filename = `${time}.png`;
 
-    Blob.build(RNFetchBlob.wrap(this.state.file.path), { type: 'image/jpeg' }).then((blob) =>
+    return Blob.build(RNFetchBlob.wrap(this.state.file.path), { type: 'image/jpeg' }).then((blob) =>
       firebase
         .storage()
         .ref(folder)
         .child(filename)
         .put(blob, { contentType: 'image/png' })
-    ).then(() => this.savePost(`${folder}/${filename}`, time));
+    ).then(() => `${folder}/${filename}`);
   }
 
-  savePost = (path, time) => {
-    const user = firebase.auth().currentUser;
+  handleSendPost = async () => {
+    let post = {};
+    this.setState({ loading: true });
 
-    //todo: fix callback hell
-    firebase.storage().ref(path).getDownloadURL().then(url => {
-      firebase.database().ref(`/feed/posts/${user.uid}`).push({
-        timestamp: time,
-        url: url
-      });
-    });
+    if (this.state.file !== null) {
+      const folderPath = await this.uploadImage(this.state.file);
+      const url = await this.getFirebaseImage(folderPath);
+      post.url = url;
+    }
 
-    this.setLoading(false);
+    if ([null, ''].indexOf(this.state.text) === -1) {
+      post.text = this.state.text;
+    }
+
+    await this.savePost(await AsyncStorage.getItem('token'), post);
+
+    this.setState({ loading: false });
     this.props.navigation.goBack();
+  }
+
+  savePost = (token, post) => {
+    return fetch('http://198.58.104.208:8080/api/post', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'access-token': token,
+      },
+      body: JSON.stringify(post)
+    });
+  }
+
+  handleImageGallery = () => {
+    ImagePicker.launchImageLibrary({}, response => {
+      if (!response.didCancel && !response.error) {
+        this.setState({ file: response });
+      }
+    });
+  }
+
+  handleTakeImage = () => {
+    ImagePicker.launchCamera({}, response => {
+      if (!response.didCancel && !response.error) {
+        this.setState({ file: response });
+      }
+    });
   }
 
   render() {
     return (
-      <View style={styles.container}>
-        <Button title='Choose Image' onPress={() => this.handlePicker()} />
-        {this.renderSelectedImage()}
+      <KeyboardAvoidingView behavior='position' style={styles.fullsize} >
+        <Card imageStyle={styles.cardImage} image={{ uri: `file://${this.state.file === null ? null : this.state.file.path}` }}>
+          <TextInput style={styles.cardText} maxLength={300} placeholder='Text here...'
+            onChangeText={text => this.setState({ text })} />
+          <View style={styles.cardButton}>
+            <TouchableOpacity style={styles.fullsize} onPress={() => this.handleTakeImage()}>
+              <Icon name='add-a-photo' />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.fullsize} onPress={() => this.handleImageGallery()}>
+              <Icon name='collections' />
+            </TouchableOpacity>
+            {this.renderSendButton()}
+          </View>
+        </Card>
         <Spinner visible={this.state.loading} />
-      </View>
+      </KeyboardAvoidingView >
     );
   }
 
-  renderSelectedImage() {
-    if (this.state.file !== null) {
+  renderSendButton() {
+    if (this.state.file !== null || [null, ''].indexOf(this.state.text) === -1) {
       return (
-        <View style={styles.containerSpacing}>
-          <Image source={{ uri: `data:image/png;base64,${this.state.file.data}` }} style={styles.image} />
-          <Button title='Send' onPress={() => this.handleUploadImage()} />
-        </View>
+        <TouchableOpacity style={styles.fullsize} onPress={() => this.handleSendPost()}>
+          <Icon name='check' />
+        </TouchableOpacity>
       );
     }
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
+  fullsize: {
     flex: 1,
   },
-  image: {
-    height: 250,
+  cardImage: {
+    height: 350,
   },
-  containerSpacing: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'space-between',
+  cardText: {
+    marginBottom: 20,
+  },
+  cardButton: {
+    flexDirection: 'row',
   },
 });
 
