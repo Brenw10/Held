@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
     AppRegistry,
     StyleSheet,
@@ -7,9 +7,10 @@ import {
     RefreshControl,
     AsyncStorage,
     Text,
-    View,
+    View
 } from 'react-native';
-import { Card, ListItem, Icon, SideMenu } from 'react-native-elements';
+import {Card, Icon, Badge} from 'react-native-elements';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 export default class Home extends Component {
     constructor(props) {
@@ -17,30 +18,31 @@ export default class Home extends Component {
 
         this.state = {
             posts: null,
-            refreshing: false
+            refreshing: false,
+            loading: false
         };
 
         this._onRefresh();
     }
 
-    static navigationOptions = ({ navigation }) => {
+    static navigationOptions = ({navigation}) => {
         return {
             title: 'Home',
-            headerTitleStyle: { alignSelf: 'center' },
-            headerLeft: <Icon name='menu' style={{ marginLeft: 15 }} />,
+            headerTitleStyle: {alignSelf: 'center'},
+            headerLeft: <Icon name='menu' style={{marginLeft: 15}}/>,
             headerRight:
-            <TouchableOpacity onPress={() => navigation.navigate('Post')}>
-                <Icon name='create' style={{ marginRight: 15 }} />
-            </TouchableOpacity>,
+                <TouchableOpacity onPress={() => navigation.navigate('Post')}>
+                    <Icon name='create' style={{marginRight: 15}}/>
+                </TouchableOpacity>,
         }
     };
 
     _onRefresh = async () => {
-        this.setState({ refreshing: true });
+        this.setState({refreshing: true});
         const token = await AsyncStorage.getItem('token');
         const posts = await this.getPosts(token);
-        this.setState({ posts: posts, refreshing: false });
-    }
+        this.setState({posts: posts, refreshing: false});
+    };
 
     getPosts = token => {
         return fetch('http://198.58.104.208:8080/api/posts', {
@@ -48,7 +50,27 @@ export default class Home extends Component {
                 'access-token': token,
             }
         }).then(response => response.json());
-    }
+    };
+
+    saveLike = (token, post, like) => {
+        return fetch('http://198.58.104.208:8080/api/post/like', {
+            method: like ? 'POST' : 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'access-token': token,
+            },
+            body: JSON.stringify(post)
+        }).then(response => response.json());
+    };
+
+    handleLike = async (post, key) => {
+        this.setState({loading: true});
+        const token = await AsyncStorage.getItem('token');
+        const response = await this.saveLike(token, post, !post.liked);
+        this.state.posts[key] = response;
+        this.setState({loading: false});
+    };
 
     render() {
         return (
@@ -59,6 +81,7 @@ export default class Home extends Component {
                 />
             }>
                 {this.renderPosts()}
+                <Spinner visible={this.state.loading}/>
             </ScrollView>
         );
     }
@@ -68,16 +91,29 @@ export default class Home extends Component {
         return this.state.posts.map((post, key) => {
             return (
                 <Card key={key}
-                    imageStyle={styles.cardImage}
-                    image={this.renderCardImage(post)}>
-                    <Text style={styles.cardText}>{post.text}</Text>
+                      title={post.text}
+                      imageStyle={styles.cardImage}
+                      image={this.renderCardImage(post)}>
                     <View style={styles.cardButton}>
-                        <TouchableOpacity style={styles.fullsize}>
-                            <Icon name='chat-bubble-outline' />
+                        <TouchableOpacity style={styles.fullSize}
+                                          onPress={() => this.props.navigation.navigate('PostDetail', {post: post})}>
+                            <Icon name='chat-bubble-outline'/>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.fullsize}>
-                            <Icon name='favorite-border' />
+                        <TouchableOpacity style={styles.fullSize} onPress={() => this.handleLike(post, key)}>
+                            {post.liked ? <Icon name='favorite' color='#be1931'/> : <Icon name='favorite-border'/>}
                         </TouchableOpacity>
+                    </View>
+                    <View style={styles.cardButton}>
+                        <View style={styles.fullSize}>
+                            <Badge containerStyle={styles.cardBadge}>
+                                <Text style={styles.badgeText}>{post.comments.length} comments</Text>
+                            </Badge>
+                        </View>
+                        <View style={styles.fullSize}>
+                            <Badge containerStyle={styles.cardBadge}>
+                                <Text style={styles.badgeText}>{post.likesLength} likes</Text>
+                            </Badge>
+                        </View>
                     </View>
                 </Card>
             );
@@ -86,7 +122,7 @@ export default class Home extends Component {
 
     renderCardImage = post => {
         if (post.url) {
-            return { uri: post.url };
+            return {uri: post.url};
         }
     }
 }
@@ -94,20 +130,24 @@ export default class Home extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#e7e8ec',
+        backgroundColor: '#e7e8ec'
     },
-    fullsize: {
-        flex: 1,
+    fullSize: {
+        flex: 1
     },
     cardImage: {
-        height: 350,
-    },
-    cardText: {
-        marginBottom: 20,
+        height: 350
     },
     cardButton: {
-        flexDirection: 'row',
+        flexDirection: 'row'
     },
+    cardBadge: {
+        backgroundColor: '#FFF'
+    },
+    badgeText: {
+        color: '#000',
+        fontWeight: '400'
+    }
 });
 
 AppRegistry.registerComponent('Home', () => Home);
