@@ -98,22 +98,16 @@ export default class Home extends Component {
                         <TouchableOpacity style={styles.fullSize}
                                           onPress={() => this.props.navigation.navigate('PostDetail', {post: post})}>
                             <Icon name='chat-bubble-outline'/>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.fullSize} onPress={() => this.handleLike(post, key)}>
-                            {post.liked ? <Icon name='favorite' color='#be1931'/> : <Icon name='favorite-border'/>}
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.cardButton}>
-                        <View style={styles.fullSize}>
                             <Badge containerStyle={styles.cardBadge}>
                                 <Text style={styles.badgeText}>{post.comments.length} comments</Text>
                             </Badge>
-                        </View>
-                        <View style={styles.fullSize}>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.fullSize} onPress={() => this.handleLike(post, key)}>
+                            {post.liked ? <Icon name='favorite' color='#be1931'/> : <Icon name='favorite-border'/>}
                             <Badge containerStyle={styles.cardBadge}>
                                 <Text style={styles.badgeText}>{post.likesLength} likes</Text>
                             </Badge>
-                        </View>
+                        </TouchableOpacity>
                     </View>
                 </Card>
             );
