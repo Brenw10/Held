@@ -1,4 +1,4 @@
-package com.held;
+package com.brendon.held;
 
 import com.facebook.react.ReactActivity;
 
