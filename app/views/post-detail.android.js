@@ -2,23 +2,24 @@ import React, {Component} from 'react';
 import {
     AppRegistry,
     StyleSheet,
-    ScrollView,
-    TextInput,
     View,
     Text,
-    TouchableOpacity,
-    AsyncStorage
+    AsyncStorage,
+    FlatList,
+    TextInput,
+    TouchableOpacity
 } from 'react-native';
-import {Card, Icon} from 'react-native-elements';
+import Icon from 'react-native-vector-icons/dist/MaterialIcons';
 import Spinner from 'react-native-loading-spinner-overlay';
 
 export default class PostDetail extends Component {
     constructor(props) {
         super(props);
+
         this.state = {
             post: props.navigation.state.params.post,
             loading: false,
-            text: ''
+            text: null
         };
     }
 
@@ -37,7 +38,7 @@ export default class PostDetail extends Component {
         this.setState({
             post: response,
             loading: false,
-            text: ''
+            text: null
         });
     };
 
@@ -55,68 +56,65 @@ export default class PostDetail extends Component {
 
     render() {
         return (
-            <ScrollView style={styles.container}>
+            <View style={styles.container}>
                 <Spinner visible={this.state.loading}/>
-                <Card>
-                    <View style={styles.cardForm}>
-                        <View style={styles.fullSize}>
-                            <TextInput maxLength={300} placeholder='Send your comment here...'
-                                       onChangeText={text => this.setState({text})}
-                                       value={this.state.text}/>
-                        </View>
-                        <TouchableOpacity style={styles.sendContainer}
-                                          onPress={() => this.handleSaveComment(this.state.text)}>
-                            <Icon name='send'/>
-                        </TouchableOpacity>
-                    </View>
-                </Card>
-                <Card title={this.state.post.text}
-                      imageStyle={styles.cardImage}
-                      image={this.renderCardImage(this.state.post)}>
-                </Card>
-                {this.renderComments()}
-            </ScrollView>
+                {this.renderList()}
+                <View style={styles.formContainer}>
+                    <TextInput
+                        style={styles.formInput}
+                        onChangeText={(text) => this.setState({text: text})}
+                        value={this.state.text}
+                    />
+                    <TouchableOpacity style={styles.sendButton} onPress={() => this.handleSaveComment(this.state.text)}>
+                        <Icon name="send" size={23} color="#000"/>
+                    </TouchableOpacity>
+                </View>
+            </View>
         );
     }
 
-    renderComments() {
+    renderList() {
         if (this.state.post === null) return;
-        return this.state.post.comments.reverse().map((comment, key) => {
-            return (
-                <Card key={key}>
-                    <Text style={styles.commentText}>{comment.text}</Text>
-                </Card>
-            );
-        });
-    }
-
-    renderCardImage = post => {
-        if (post.url) {
-            return {uri: post.url};
-        }
+        return (
+            <FlatList
+                data={this.state.post.comments}
+                keyExtractor={(_, index) => index}
+                renderItem={({item}) =>
+                    <View style={styles.listContainer}>
+                        <Text style={styles.listText}>{item.text}</Text>
+                    </View>
+                }
+            />
+        );
     }
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#e7e8ec'
+        backgroundColor: '#FFF'
     },
-    cardForm: {
-        flexDirection: 'row'
+    listContainer: {
+        padding: 15,
+        backgroundColor: '#FFF',
+        flexDirection: 'row',
+        borderBottomWidth: 1,
+        borderColor: '#e7e8ec'
     },
-    cardImage: {
-        height: 350
-    },
-    commentText: {
+    listText: {
         color: '#000'
     },
-    fullSize: {
-        flex: 1
+    formContainer: {
+        flexDirection: 'row'
     },
-    sendContainer: {
-        flexDirection: 'row',
-        alignItems: 'center'
+    formInput: {
+        flex: 1,
+        marginLeft: 10,
+        marginBottom: 10
+    },
+    sendButton: {
+        alignSelf: 'center',
+        padding: 10
     }
 });
 

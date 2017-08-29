@@ -7,9 +7,10 @@ import {
     RefreshControl,
     AsyncStorage,
     Text,
-    View
+    View,
+    Image
 } from 'react-native';
-import {Card, Icon, Badge} from 'react-native-elements';
+import Icon from 'react-native-vector-icons/dist/MaterialIcons';
 import Spinner from 'react-native-loading-spinner-overlay';
 
 export default class Home extends Component {
@@ -29,10 +30,11 @@ export default class Home extends Component {
         return {
             title: 'Home',
             headerTitleStyle: {alignSelf: 'center'},
-            headerLeft: <Icon name='menu' style={{marginLeft: 15}}/>,
+            headerLeft:
+                <Icon name="menu" size={23} style={{marginLeft: 15}} color="#000"/>,
             headerRight:
                 <TouchableOpacity onPress={() => navigation.navigate('Post')}>
-                    <Icon name='create' style={{marginRight: 15}}/>
+                    <Icon name="create" size={23} style={{marginRight: 15}} color="#000"/>
                 </TouchableOpacity>,
         }
     };
@@ -80,45 +82,43 @@ export default class Home extends Component {
                     onRefresh={() => this._onRefresh()}
                 />
             }>
-                {this.renderPosts()}
                 <Spinner visible={this.state.loading}/>
+                {this.renderCards()}
             </ScrollView>
         );
     }
 
-    renderPosts() {
+    renderCards() {
         if (this.state.posts === null) return;
         return this.state.posts.map((post, key) => {
             return (
-                <Card key={key}
-                      title={post.text}
-                      imageStyle={styles.cardImage}
-                      image={this.renderCardImage(post)}>
-                    <View style={styles.cardButton}>
-                        <TouchableOpacity style={styles.fullSize}
+                <View key={key} style={styles.cardContainer}>
+                    <View style={styles.titleContainer}>
+                        <Text style={styles.cardTitle}>{post.username ? post.username : 'Anonymous'}</Text>
+                    </View>
+                    <Image style={styles.cardImage} source={{uri: post.url}}/>
+                    <View style={styles.descriptionContainer}>
+                        <Text>{post.text}</Text>
+                    </View>
+                    <View style={styles.cardButtonContainer}>
+                        <TouchableOpacity style={styles.cardButton}
                                           onPress={() => this.props.navigation.navigate('PostDetail', {post: post})}>
-                            <Icon name='chat-bubble-outline'/>
-                            <Badge containerStyle={styles.cardBadge}>
-                                <Text style={styles.badgeText}>{post.comments.length} comments</Text>
-                            </Badge>
+                            <Icon name="comment" size={23} color="#353536"/>
+                            <Text style={styles.cardButtonLabel}>{post.comments.length}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.fullSize} onPress={() => this.handleLike(post, key)}>
-                            {post.liked ? <Icon name='favorite' color='#be1931'/> : <Icon name='favorite-border'/>}
-                            <Badge containerStyle={styles.cardBadge}>
-                                <Text style={styles.badgeText}>{post.likesLength} likes</Text>
-                            </Badge>
+                        <TouchableOpacity style={styles.cardButton} onPress={() => this.handleLike(post, key)}>
+                            {
+                                post.liked
+                                    ? <Icon name="favorite" size={23} color="#be1931"/>
+                                    : <Icon name="favorite-border" size={23} color="#353536"/>
+                            }
+                            <Text style={styles.cardButtonLabel}>{post.likesLength}</Text>
                         </TouchableOpacity>
                     </View>
-                </Card>
+                </View>
             );
         });
-    }
-
-    renderCardImage = post => {
-        if (post.url) {
-            return {uri: post.url};
-        }
-    }
+    };
 }
 
 const styles = StyleSheet.create({
@@ -126,21 +126,43 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#e7e8ec'
     },
-    fullSize: {
-        flex: 1
-    },
-    cardImage: {
-        height: 350
-    },
-    cardButton: {
-        flexDirection: 'row'
-    },
-    cardBadge: {
+    cardContainer: {
+        flex: 1,
+        marginTop: 10,
         backgroundColor: '#FFF'
     },
-    badgeText: {
+    titleContainer: {
+        padding: 12,
+        borderWidth: 1,
+        borderColor: '#bbbcc0',
+        alignItems: 'center'
+    },
+    cardTitle: {
         color: '#000',
-        fontWeight: '400'
+        fontWeight: '400',
+        fontSize: 13.5
+    },
+    cardImage: {
+        height: 300,
+        resizeMode: 'contain'
+    },
+    cardButtonContainer: {
+        flexDirection: 'row',
+        padding: 12,
+        borderWidth: 1,
+        borderColor: '#bbbcc0'
+    },
+    cardButton: {
+        flex: 1,
+        alignItems: 'center'
+    },
+    cardButtonLabel: {
+        fontSize: 12
+    },
+    descriptionContainer: {
+        borderTopWidth: 1,
+        borderColor: '#bbbcc0',
+        padding: 12
     }
 });
 

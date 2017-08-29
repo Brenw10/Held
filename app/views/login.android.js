@@ -1,13 +1,13 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
     AppRegistry,
     StyleSheet,
     View,
-    AsyncStorage,
+    AsyncStorage
 } from 'react-native';
-import FBSDK, { LoginManager, AccessToken } from 'react-native-fbsdk';
-import { SocialIcon } from 'react-native-elements'
+import {LoginManager, AccessToken} from 'react-native-fbsdk';
 import * as firebase from 'firebase';
+import Icon from 'react-native-vector-icons/dist/FontAwesome';
 
 export default class Login extends Component {
     constructor(props) {
@@ -31,7 +31,7 @@ export default class Login extends Component {
             messagingSenderId: "828413601398"
         };
         firebase.initializeApp(config);
-    }
+    };
 
     handleToken = async () => {
         const result = await LoginManager.logInWithReadPermissions(['public_profile', 'user_friends', 'email']);
@@ -39,7 +39,7 @@ export default class Login extends Component {
             const data = await AccessToken.getCurrentAccessToken();
             this.handleLogin(data.accessToken);
         }
-    }
+    };
 
     handleLogin = token => {
         this.isValidToken(token).then(response => {
@@ -48,7 +48,7 @@ export default class Login extends Component {
                 this.loginSuccess(token);
             }
         });
-    }
+    };
 
     loginFirebase = token => {
         const facebookCredential = firebase.auth.FacebookAuthProvider.credential(token);
@@ -61,18 +61,20 @@ export default class Login extends Component {
                 'access-token': token,
             }
         });
-    }
+    };
 
     loginSuccess = token => {
         AsyncStorage.setItem('token', token);
         this.props.navigation.navigate('Home');
-    }
+    };
 
     render() {
         return (
             <View style={styles.container}>
                 <View style={styles.buttonContainer}>
-                    <SocialIcon button type='facebook' title='Sign In With Facebook' onPress={() => this.handleToken()} />
+                    <Icon.Button name="facebook-square" backgroundColor="#3b5998" onPress={() => this.handleToken()}>
+                        Login with Facebook
+                    </Icon.Button>
                 </View>
             </View>
         );
@@ -88,6 +90,7 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'column',
         justifyContent: 'flex-end',
+        margin: 20
     },
 });
 
