@@ -12,7 +12,7 @@ import {
 import Icon from 'react-native-vector-icons/dist/MaterialIcons';
 import Spinner from 'react-native-loading-spinner-overlay';
 
-export default class PostDetail extends Component {
+export default class Comment extends Component {
     constructor(props) {
         super(props);
 
@@ -77,7 +77,7 @@ export default class PostDetail extends Component {
         if (this.state.post === null) return;
         return (
             <FlatList
-                data={this.state.post.comments}
+                data={this.state.post.comments.reverse()}
                 keyExtractor={(_, index) => index}
                 renderItem={({item}) =>
                     <View style={styles.listContainer}>
@@ -118,4 +118,4 @@ const styles = StyleSheet.create({
     }
 });
 
-AppRegistry.registerComponent('PostDetail', () => PostDetail);
+AppRegistry.registerComponent('Comment', () => Comment);

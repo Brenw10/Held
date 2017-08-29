@@ -102,7 +102,7 @@ export default class Home extends Component {
                     </View>
                     <View style={styles.cardButtonContainer}>
                         <TouchableOpacity style={styles.cardButton}
-                                          onPress={() => this.props.navigation.navigate('PostDetail', {post: post})}>
+                                          onPress={() => this.props.navigation.navigate('Comment', {post: post})}>
                             <Icon name="comment" size={23} color="#353536"/>
                             <Text style={styles.cardButtonLabel}>{post.comments.length}</Text>
                         </TouchableOpacity>

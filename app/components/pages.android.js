@@ -1,9 +1,9 @@
 import {AppRegistry} from 'react-native';
-import {StackNavigator, DrawerNavigator} from 'react-navigation';
+import {StackNavigator} from 'react-navigation';
 import HomeView from 'Held/app/views/home';
-// import PostView from 'Held/app/views/post';
+import PostView from 'Held/app/views/post';
 import LoginView from 'Held/app/views/login';
-import PostDetailView from 'Held/app/views/post-detail';
+import CommentView from 'Held/app/views/comment';
 
 export default StackNavigator({
     Login: {
@@ -12,11 +12,11 @@ export default StackNavigator({
     Home: {
         screen: HomeView
     },
-    // Post: {
-    //     screen: PostView
-    // },
-    PostDetail: {
-        screen: PostDetailView
+    Post: {
+        screen: PostView
+    },
+    Comment: {
+        screen: CommentView
     }
 });
 
