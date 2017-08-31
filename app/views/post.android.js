@@ -8,7 +8,8 @@ import {
     Picker,
     TextInput,
     TouchableOpacity,
-    Text
+    Text,
+    Modal
 } from 'react-native';
 import Icon from 'react-native-vector-icons/dist/MaterialIcons';
 import ImagePicker from 'react-native-image-picker';
@@ -18,10 +19,15 @@ export default class Post extends Component {
         super(props);
 
         this.state = {
+            // View information
             currentUser: null,
+            isModalVisible: false,
+
+            // Post information
             image: null,
             hasUser: false,
-            text: null
+            text: null,
+            music: null,
         };
 
         this.getCurrentUser().then(user => this.setState({currentUser: user}));
@@ -40,7 +46,7 @@ export default class Post extends Component {
         }).then(response => response.json());
     };
 
-    showGallery = () => {
+    handleGallery = () => {
         ImagePicker.launchImageLibrary({}, response => {
             if (response.didCancel || response.error) return;
             this.setState({image: response});
@@ -57,11 +63,12 @@ export default class Post extends Component {
     render() {
         return (
             <View style={styles.cardContainer}>
+                {this.renderLinkModal()}
                 {this.renderTitle()}
                 {this.renderImage()}
                 <View style={styles.descriptionContainer}>
                     <TextInput
-                        onChangeText={(text) => this.setState({text: text})}
+                        onChangeText={text => this.setState({text: text})}
                         value={this.state.text}
                     />
                 </View>
@@ -69,11 +76,12 @@ export default class Post extends Component {
                     <TouchableOpacity style={styles.cardButton} onPress={() => this.handleTakeImage()}>
                         <Icon name="add-a-photo" size={23} color="#353536"/>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.cardButton} onPress={() => this.showGallery()}>
+                    <TouchableOpacity style={styles.cardButton} onPress={() => this.handleGallery()}>
                         <Icon name="collections" size={23} color="#353536"/>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.cardButton}>
-                        <Icon name="queue-music" size={23} color="#353536"/>
+                        <Icon name="queue-music" size={23} color="#353536"
+                              onPress={() => this.setState({isModalVisible: true})}/>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.cardButton}>
                         <Icon name="send" size={23} color="#353536"/>
@@ -103,6 +111,23 @@ export default class Post extends Component {
                     <Picker.Item label={this.state.currentUser.name} value={true}/>
                 </Picker>
             </View>
+        );
+    }
+
+    renderLinkModal() {
+        return (
+            <Modal visible={this.state.isModalVisible} onRequestClose={() => this.setState({isModalVisible: false})}>
+                <View style={{flex: 1, margin: 10}}>
+                    <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+                        <TouchableOpacity onPress={() => this.setState({isModalVisible: false})}>
+                            <Icon name="close" size={23} color="#000"/>
+                        </TouchableOpacity>
+                    </View>
+                    <TextInput
+                        onChangeText={music => this.setState({music: music})}
+                        value={this.state.music} placeholder="Copy music link here"/>
+                </View>
+            </Modal>
         );
     }
 }
