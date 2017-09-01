@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/dist/MaterialIcons';
 import Spinner from 'react-native-loading-spinner-overlay';
+import Endpoint from 'Held/app/core/endpoint';
 
 export default class Home extends Component {
     constructor(props) {
@@ -28,10 +29,12 @@ export default class Home extends Component {
 
     static navigationOptions = ({navigation}) => {
         return {
-            title: 'Home',
+            title: 'Held',
             headerTitleStyle: {alignSelf: 'center'},
             headerLeft:
-                <Icon name="menu" size={23} style={{marginLeft: 15}} color="#000"/>,
+                <TouchableOpacity>
+                    <Icon name="menu" size={23} style={{marginLeft: 15}} color="#000"/>
+                </TouchableOpacity>,
             headerRight:
                 <TouchableOpacity onPress={() => navigation.navigate('Post')}>
                     <Icon name="create" size={23} style={{marginRight: 15}} color="#000"/>
@@ -47,7 +50,7 @@ export default class Home extends Component {
     };
 
     getPosts = token => {
-        return fetch('http://198.58.104.208:8080/api/posts', {
+        return fetch(`${Endpoint.BASE_URL}/api/posts`, {
             headers: {
                 'access-token': token,
             }
@@ -55,7 +58,7 @@ export default class Home extends Component {
     };
 
     saveLike = (token, post, like) => {
-        return fetch('http://198.58.104.208:8080/api/post/like', {
+        return fetch(`${Endpoint.BASE_URL}/api/post/like`, {
             method: like ? 'POST' : 'DELETE',
             headers: {
                 'Accept': 'application/json',

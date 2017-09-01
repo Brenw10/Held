@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/dist/MaterialIcons';
 import Spinner from 'react-native-loading-spinner-overlay';
+import Endpoint from 'Held/app/core/endpoint';
 
 export default class Comment extends Component {
     constructor(props) {
@@ -43,7 +44,7 @@ export default class Comment extends Component {
     };
 
     saveComment = (token, post) => {
-        return fetch('http://198.58.104.208:8080/api/post/comment', {
+        return fetch(`${Endpoint.BASE_URL}/api/post/comment`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',

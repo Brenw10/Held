@@ -8,6 +8,7 @@ import {
 import {LoginManager, AccessToken} from 'react-native-fbsdk';
 import * as firebase from 'firebase';
 import Icon from 'react-native-vector-icons/dist/FontAwesome';
+import Endpoint from 'Held/app/core/endpoint';
 
 export default class Login extends Component {
     constructor(props) {
@@ -56,7 +57,7 @@ export default class Login extends Component {
     };
 
     isValidToken = token => {
-        return fetch('http://198.58.104.208:8080/api/auth', {
+        return fetch(`${Endpoint.BASE_URL}/api/auth`, {
             headers: {
                 'access-token': token,
             }

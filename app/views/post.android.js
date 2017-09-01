@@ -7,12 +7,11 @@ import {
     AsyncStorage,
     Picker,
     TextInput,
-    TouchableOpacity,
-    Text,
-    Modal
+    TouchableOpacity
 } from 'react-native';
 import Icon from 'react-native-vector-icons/dist/MaterialIcons';
 import ImagePicker from 'react-native-image-picker';
+import Endpoint from 'Held/app/core/endpoint';
 
 export default class Post extends Component {
     constructor(props) {
@@ -21,13 +20,11 @@ export default class Post extends Component {
         this.state = {
             // View information
             currentUser: null,
-            isModalVisible: false,
 
             // Post information
             image: null,
             hasUser: false,
             text: null,
-            music: null,
         };
 
         this.getCurrentUser().then(user => this.setState({currentUser: user}));
@@ -38,7 +35,7 @@ export default class Post extends Component {
     };
 
     getCurrentUser = async () => {
-        return fetch('http://198.58.104.208:8080/api/user', {
+        return fetch(`${Endpoint.BASE_URL}/api/user`, {
             method: 'GET',
             headers: {
                 'access-token': await AsyncStorage.getItem('token')
@@ -60,10 +57,16 @@ export default class Post extends Component {
         });
     };
 
+    canSubmit = () => {
+        const hasText = this.state.text;
+        const hasImage = this.state.image !== null;
+
+        return hasText || hasImage;
+    };
+
     render() {
         return (
             <View style={styles.cardContainer}>
-                {this.renderLinkModal()}
                 {this.renderTitle()}
                 {this.renderImage()}
                 <View style={styles.descriptionContainer}>
@@ -79,15 +82,18 @@ export default class Post extends Component {
                     <TouchableOpacity style={styles.cardButton} onPress={() => this.handleGallery()}>
                         <Icon name="collections" size={23} color="#353536"/>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.cardButton}>
-                        <Icon name="queue-music" size={23} color="#353536"
-                              onPress={() => this.setState({isModalVisible: true})}/>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.cardButton}>
-                        <Icon name="send" size={23} color="#353536"/>
-                    </TouchableOpacity>
+                    {this.renderSubmit()}
                 </View>
             </View>
+        );
+    }
+
+    renderSubmit() {
+        if (!this.canSubmit()) return;
+        return (
+            <TouchableOpacity style={styles.cardButton}>
+                <Icon name="send" size={23} color="#353536"/>
+            </TouchableOpacity>
         );
     }
 
@@ -111,23 +117,6 @@ export default class Post extends Component {
                     <Picker.Item label={this.state.currentUser.name} value={true}/>
                 </Picker>
             </View>
-        );
-    }
-
-    renderLinkModal() {
-        return (
-            <Modal visible={this.state.isModalVisible} onRequestClose={() => this.setState({isModalVisible: false})}>
-                <View style={{flex: 1, margin: 10}}>
-                    <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-                        <TouchableOpacity onPress={() => this.setState({isModalVisible: false})}>
-                            <Icon name="close" size={23} color="#000"/>
-                        </TouchableOpacity>
-                    </View>
-                    <TextInput
-                        onChangeText={music => this.setState({music: music})}
-                        value={this.state.music} placeholder="Copy music link here"/>
-                </View>
-            </Modal>
         );
     }
 }
