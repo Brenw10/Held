@@ -1,5 +1,5 @@
-import {AppRegistry} from 'react-native';
-import {StackNavigator} from 'react-navigation';
+import { AppRegistry } from 'react-native';
+import { StackNavigator } from 'react-navigation';
 import HomeView from 'Held/app/views/home';
 import PostView from 'Held/app/views/post';
 import LoginView from 'Held/app/views/login';

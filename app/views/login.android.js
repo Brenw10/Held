@@ -8,18 +8,32 @@ import {
 import { LoginManager, AccessToken } from 'react-native-fbsdk';
 import * as firebase from 'firebase';
 import Icon from 'react-native-vector-icons/dist/FontAwesome';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 export default class Login extends Component {
     constructor(props) {
         super(props);
-        this.initializeFirebase();
+        this.state = { loading: true };
+        this._init();
     }
 
     static navigationOptions = {
         header: null,
     };
 
-    initializeFirebase() {
+    _init = async () => {
+        this.initializeFirebase();
+        const accessToken = JSON.parse(await AsyncStorage.getItem('access-token'));
+        if (accessToken) {
+            await this.loginFirebase(accessToken.accessToken);
+            this.props.navigation.navigate('Home');
+            this.setState({ loading: false });
+        } else {
+            this.setState({ loading: false });
+        }
+    }
+
+    initializeFirebase = () => {
         //todo: read it from parameter place
         const config = {
             apiKey: "AIzaSyCc-gCBjPIW-CcIAHxttdB9cHks7W_t1R0",
@@ -33,10 +47,12 @@ export default class Login extends Component {
     };
 
     login = async () => {
+        this.setState({ loading: true });
         const accessToken = await this.getAccessToken();
         await this.loginFirebase(accessToken.accessToken);
-        AsyncStorage.setItem('access-token', accessToken);
+        await AsyncStorage.setItem('access-token', JSON.stringify(accessToken));
         this.props.navigation.navigate('Home');
+        this.setState({ loading: false });
     }
 
     getAccessToken = async () => {
@@ -52,6 +68,7 @@ export default class Login extends Component {
     render() {
         return (
             <View style={styles.container}>
+                <Spinner visible={this.state.loading} />
                 <View style={styles.buttonContainer}>
                     <Icon.Button name="facebook-square" backgroundColor="#3b5998" onPress={this.login}>
                         Login with Facebook
