@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     AppRegistry,
     View,
@@ -12,33 +12,41 @@ import {
 import Icon from 'react-native-vector-icons/dist/MaterialIcons';
 import ImagePicker from 'react-native-image-picker';
 import Endpoint from 'Held/app/core/endpoint';
+import RNFetchBlob from 'react-native-fetch-blob';
+import Spinner from 'react-native-loading-spinner-overlay';
+import * as firebase from 'firebase';
 
 export default class Post extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            // View information
             currentUser: null,
-
-            // Post information
             image: null,
             hasUser: false,
-            text: null,
+            loading: false,
+            text: null
         };
 
-        this.getCurrentUser().then(user => this.setState({currentUser: user}));
+        this._init();
     }
 
     static navigationOptions = {
         title: 'Share'
     };
 
+    _init = async () => {
+        this.setState({ loading: true });
+        const currentUser = await this.getCurrentUser()
+        this.setState({ currentUser: currentUser, loading: false });
+    }
+
     getCurrentUser = async () => {
+        const data = JSON.parse(await AsyncStorage.getItem('access-token'));
         return fetch(`${Endpoint.BASE_URL}/api/user`, {
             method: 'GET',
             headers: {
-                'access-token': await AsyncStorage.getItem('token')
+                'access-token': data.accessToken
             }
         }).then(response => response.json());
     };
@@ -46,75 +54,114 @@ export default class Post extends Component {
     handleGallery = () => {
         ImagePicker.launchImageLibrary({}, response => {
             if (response.didCancel || response.error) return;
-            this.setState({image: response});
+            this.setState({ image: response });
         });
     };
 
     handleTakeImage = () => {
         ImagePicker.launchCamera({}, response => {
             if (response.didCancel || response.error) return;
-            this.setState({image: response});
+            this.setState({ image: response });
         });
     };
 
-    canSubmit = () => {
-        const hasText = this.state.text;
-        const hasImage = this.state.image !== null;
+    canCreate = () => this.state.text || this.state.image;
 
-        return hasText || hasImage;
-    };
+    getImageBlob = image => {
+        const polyfill = RNFetchBlob.polyfill
+        window.XMLHttpRequest = polyfill.XMLHttpRequest;
+        window.Blob = polyfill.Blob;
+
+        return Blob.build(RNFetchBlob.wrap(image.path), { type: 'image/jpeg' });
+    }
+
+    getUploadedImage = () => {
+        const user = firebase.auth().currentUser;
+
+        const folder = `/users/${user.uid}`;
+        const filename = `${new Date().getTime()}.png`;
+
+        return this.getImageBlob(this.state.image)
+            .then(blob => firebase.storage().ref(folder).child(filename).put(blob, { contentType: 'image/png' }))
+            .then(() => firebase.storage().ref(`${folder}/${filename}`).getDownloadURL());
+    }
+
+    create = async () => {
+        this.setState({ loading: true });
+
+        const post = {
+            url: this.state.image ? await this.getUploadedImage() : null,
+            text: this.state.text,
+            name: this.state.hasUser ? this.state.currentUser.name : null
+        };
+
+        const data = JSON.parse(await AsyncStorage.getItem('access-token'));
+        await fetch(`http://198.58.104.208:8080/api/user/${this.state.currentUser.id}/post`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'access-token': data.accessToken,
+            },
+            body: JSON.stringify(post)
+        });
+
+        this.props.navigation.navigate('Home');
+        this.setState({ loading: false });
+    }
 
     render() {
         return (
             <View style={styles.cardContainer}>
-                {this.renderTitle()}
-                {this.renderImage()}
+                <Spinner visible={this.state.loading} />
+                {this.getTitle()}
+                {this.getImage()}
                 <View style={styles.descriptionContainer}>
                     <TextInput
-                        onChangeText={text => this.setState({text: text})}
+                        onChangeText={text => this.setState({ text: text })}
                         value={this.state.text}
                     />
                 </View>
                 <View style={styles.cardButtonContainer}>
                     <TouchableOpacity style={styles.cardButton} onPress={() => this.handleTakeImage()}>
-                        <Icon name="add-a-photo" size={23} color="#353536"/>
+                        <Icon name="add-a-photo" size={23} color="#353536" />
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.cardButton} onPress={() => this.handleGallery()}>
-                        <Icon name="collections" size={23} color="#353536"/>
+                        <Icon name="collections" size={23} color="#353536" />
                     </TouchableOpacity>
-                    {this.renderSubmit()}
+                    {this.getSubmit()}
                 </View>
             </View>
         );
     }
 
-    renderSubmit() {
-        if (!this.canSubmit()) return;
+    getSubmit() {
+        if (!this.canCreate()) return;
         return (
-            <TouchableOpacity style={styles.cardButton}>
-                <Icon name="send" size={23} color="#353536"/>
+            <TouchableOpacity style={styles.cardButton} onPress={() => this.create()}>
+                <Icon name="send" size={23} color="#353536" />
             </TouchableOpacity>
         );
     }
 
-    renderImage() {
-        if (this.state.image === null) return;
+    getImage() {
+        if (!this.state.image) return;
         return (
             <View style={styles.imageContainer}>
-                <Image style={styles.cardImage} source={{uri: `file://${this.state.image.path}`}}/>
+                <Image style={styles.cardImage} source={{ uri: `file://${this.state.image.path}` }} />
             </View>
         );
     }
 
-    renderTitle() {
-        if (this.state.currentUser === null) return;
+    getTitle() {
+        if (!this.state.currentUser) return;
         return (
             <View style={styles.titleContainer}>
                 <Picker
                     selectedValue={this.state.hasUser}
-                    onValueChange={value => this.setState({hasUser: value})}>
-                    <Picker.Item label='Anonymous' value={false}/>
-                    <Picker.Item label={this.state.currentUser.name} value={true}/>
+                    onValueChange={value => this.setState({ hasUser: value })}>
+                    <Picker.Item label='Anonymous' value={false} />
+                    <Picker.Item label={this.state.currentUser.name} value={true} />
                 </Picker>
             </View>
         );

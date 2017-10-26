@@ -49,10 +49,10 @@ export default class Home extends Component {
     }
 
     getPosts = async () => {
-        const accessToken = JSON.parse(await AsyncStorage.getItem('access-token'));
+        const data = JSON.parse(await AsyncStorage.getItem('access-token'));
         return fetch(`${Endpoint.BASE_URL}/api/posts`, {
             headers: {
-                'access-token': accessToken.accessToken,
+                'access-token': data.accessToken,
             }
         }).then(response => response.json());
     };
