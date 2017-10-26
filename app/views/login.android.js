@@ -1,27 +1,25 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     AppRegistry,
     StyleSheet,
     View,
     AsyncStorage
 } from 'react-native';
-import {LoginManager, AccessToken} from 'react-native-fbsdk';
+import { LoginManager, AccessToken } from 'react-native-fbsdk';
 import * as firebase from 'firebase';
 import Icon from 'react-native-vector-icons/dist/FontAwesome';
-import Endpoint from 'Held/app/core/endpoint';
 
 export default class Login extends Component {
     constructor(props) {
         super(props);
         this.initializeFirebase();
-        AsyncStorage.getItem('token').then(token => this.handleLogin(token));
     }
 
     static navigationOptions = {
         header: null,
     };
 
-    initializeFirebase = () => {
+    initializeFirebase() {
         //todo: read it from parameter place
         const config = {
             apiKey: "AIzaSyCc-gCBjPIW-CcIAHxttdB9cHks7W_t1R0",
@@ -34,46 +32,28 @@ export default class Login extends Component {
         firebase.initializeApp(config);
     };
 
-    handleToken = async () => {
-        const result = await LoginManager.logInWithReadPermissions(['public_profile', 'user_friends', 'email']);
-        if (!result.isCancelled) {
-            const data = await AccessToken.getCurrentAccessToken();
-            this.handleLogin(data.accessToken);
-        }
-    };
+    login = async () => {
+        const accessToken = await this.getAccessToken();
+        await this.loginFirebase(accessToken.accessToken);
+        AsyncStorage.setItem('access-token', accessToken);
+        this.props.navigation.navigate('Home');
+    }
 
-    handleLogin = token => {
-        this.isValidToken(token).then(response => {
-            if (response.ok) {
-                this.loginFirebase(token);
-                this.loginSuccess(token);
-            }
-        });
-    };
+    getAccessToken = async () => {
+        const result = await LoginManager.logInWithReadPermissions(['public_profile', 'user_friends', 'email']);
+        return AccessToken.getCurrentAccessToken();
+    }
 
     loginFirebase = token => {
-        const facebookCredential = firebase.auth.FacebookAuthProvider.credential(token);
-        return firebase.auth().signInWithCredential(facebookCredential);
-    };
-
-    isValidToken = token => {
-        return fetch(`${Endpoint.BASE_URL}/api/auth`, {
-            headers: {
-                'access-token': token,
-            }
-        });
-    };
-
-    loginSuccess = token => {
-        AsyncStorage.setItem('token', token);
-        this.props.navigation.navigate('Home');
-    };
+        const credential = firebase.auth.FacebookAuthProvider.credential(token);
+        return firebase.auth().signInWithCredential(credential);
+    }
 
     render() {
         return (
             <View style={styles.container}>
                 <View style={styles.buttonContainer}>
-                    <Icon.Button name="facebook-square" backgroundColor="#3b5998" onPress={() => this.handleToken()}>
+                    <Icon.Button name="facebook-square" backgroundColor="#3b5998" onPress={this.login}>
                         Login with Facebook
                     </Icon.Button>
                 </View>
